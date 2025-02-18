@@ -1,7 +1,7 @@
 import WebSocket from "ws"; // Node.js websocket library
 import { WebSocketRequest, newTokenListing } from './types'; // Typescript Types for type safety
 import { config } from "./config"; // Configuration parameters for our bot
-import { fetchTransactionDetails, createSwapTransaction, getRugCheckConfirmed, fetchAndSaveSwapDetails, parseIndividualSolanaSignature } from "./transactions";
+import { fetchTransactionDetails, createSwapTransaction, getRugCheckConfirmed, fetchAndSaveSwapDetails } from "./transactions";
 import { validateEnv } from "./utils/env-validator";
 import { getNewToken, getTokenSecurity } from "./tokenutility";
 import { selectAllHoldings, selectAllTokens, selectTokenByName, selectTokenByNameAndCreator } from "./tracker/db";
@@ -95,14 +95,9 @@ async function processTransaction(tokenMint: string | null, symbol: string | nul
 
   // Fetch and store the transaction for tracking purposes
   const saveConfirmation = await fetchAndSaveSwapDetails(tx);
-
-
   if (!saveConfirmation) {
     console.log("❌ Warning: Transaction not saved for tracking! Track Manually!");
-
   }
-
-
 
 }
 
@@ -143,9 +138,7 @@ async function birdEyeTokenSeeker(): Promise<void> {
     } else {
       console.log("⏳ Max concurrent transactions reached, skipping...");
     }
-
   }
-
 }
 
 // Function used to open our websocket connection
@@ -269,87 +262,6 @@ async function rpcTokenSeeker(): Promise<void> {
   });
 }
 
-
-// Token search on Pump.fun
-async function pumpFunTokenSeeker(): Promise<void> {
-  if (!init) console.clear();
-
-
-  /**
-   *  Create a WebSocket connection
-   */
-  const parseTxUrl = process.env.HELIUS_WSS_URI || "";
-  let ws: WebSocket | null = new WebSocket(parseTxUrl);
-
-  /**
-   *  Send subscription to the websocket once the connection is open, in order to subscribe to logSubscribe
-   */
-  ws.on("open", () => {
-    if (ws) sendSubscribeRequestMigration(ws);
-    console.log("\n🔓 WebSocket is open and listening.");
-    init = true;
-  });
-
-  /**
-   *  Proceed with logic when we receive a message from the websocket stream
-   */
-  ws.on("message", async (data: WebSocket.Data) => {
-    try {
-      const jsonString = data.toString(); // Convert data to a string
-      const parsedData = JSON.parse(jsonString); // Parse the JSON string
-
-      // Handle subscription response
-      if (parsedData.result !== undefined && !parsedData.error) {
-        console.log("✅ Subscription confirmed");
-        return;
-      }
-
-      // Only log RPC errors for debugging
-      if (parsedData.error) {
-        console.error("🚫 RPC Error:", parsedData.error);
-        return;
-      }
-
-      // Safely access the nested structure
-      const logs = parsedData?.params?.result?.value?.logs;
-      const signature = parsedData?.params?.result?.value?.signature;
-
-      // Validate `logs` is an array and if we have a signtature
-      if (!Array.isArray(logs) || !signature) return;
-
-      //Verify if this is a liquidity removal from pump fun
-      const containsCreate = logs.some((log: string) => typeof log === "string" && log.includes("Program log: Instruction: Withdraw"));
-      if (!containsCreate || typeof signature !== "string") return;
-
-      // Process transaction asynchronously
-      processTransaction(null, null, signature).catch((error) => {
-        console.error("Error processing transaction:", error);
-      });
-    } catch (error) {
-      console.error("💥 Error processing websocket message:", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        timestamp: new Date().toISOString(),
-      });
-    }
-  });
-
-  /**
-   *  Handle other states like error and close.
-   */
-  ws.on("error", (err: Error) => {
-    console.error("WebSocket error:", err);
-  });
-  ws.on("close", () => {
-    console.log("📴 WebSocket connection closed, cleaning up...");
-    if (ws) {
-      ws.removeAllListeners();
-      ws = null;
-    }
-    console.log("🔄 Attempting to reconnect in 5 seconds...");
-    setTimeout(pumpFunTokenSeeker, 5000);
-  });
-}
-
 if (config.scan_options.token_search_engine === "helius") {
   // Start rpcTokenSeeker
   rpcTokenSeeker().catch((err) => {
@@ -364,9 +276,3 @@ if (config.scan_options.token_search_engine === "birdEye") {
   });
 }
 
-if (config.scan_options.token_search_engine === "pumpfun") {
-  // Start birdEyeTokenSeeker
-  pumpFunTokenSeeker().catch((err) => {
-    console.error(err.message);
-  });
-}
