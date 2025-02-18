@@ -1,6 +1,6 @@
 ## Solana Token Sniper
 
-Forked from [DigitalBenjamins](https://github.com/digbenjamins/SolanaTokenSniper/)
+Forked from [DigitalBenjamins](https://github.com/digbenjamins/SolanaTokenSniper/).
 A [BirdEye API](https://docs.birdeye.so/) is needed for faster and latency free pricechecks.
 The focus of this Sniperbot is on paper-trading to simulate the best configs. Please check out the config.ts carefully.
 
