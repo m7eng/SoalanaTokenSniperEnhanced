@@ -135,7 +135,7 @@ async function birdEyeTokenSeeker(): Promise<void> {
 }
 
 // Function used to open our websocket connection
-function sendSubscribeRequestRadiyiumProgram(ws: WebSocket): void {
+function sendSubscribeRequestRaydiumProgram(ws: WebSocket): void {
   const request: WebSocketRequest = {
     jsonrpc: "2.0",
     id: 1,
@@ -164,7 +164,7 @@ async function rpcTokenSeeker(): Promise<void> {
   // Send subscription to the websocket once the connection is open
   ws.on("open", () => {
     // Subscribe
-    if (ws) sendSubscribeRequestRadiyiumProgram(ws); // Send a request once the WebSocket is open
+    if (ws) sendSubscribeRequestRaydiumProgram(ws); // Send a request once the WebSocket is open
     console.log("\n🔓 WebSocket is open and listening.");
     init = true;
   });
