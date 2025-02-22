@@ -581,7 +581,7 @@ export async function fetchAndSaveSwapDetails(tx: string): Promise<boolean> {
       // Calculate paid price in USDC
       const simulatedPaidUSDC = solPriceInUSD * simulatedTransactionDetails.paidSol / 1_000_000_000;
 
-      // Fake Transaction Data for Simulation
+      // Fake Transaction Data for Simulation, the reason I am making it this complicated is because I want to simulate the timings as well at least a bit
       swapTransactionData = {
         programInfo: {
           source: "Simulation source",

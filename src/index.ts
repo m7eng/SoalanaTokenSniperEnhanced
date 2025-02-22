@@ -5,19 +5,12 @@ import { fetchTransactionDetails, createSwapTransaction, getRugCheckConfirmed, f
 import { validateEnv } from "./utils/env-validator";
 import { getNewToken, getTokenSecurity } from "./tokenutility";
 import { selectAllHoldings, selectAllTokens, selectTokenByName, selectTokenByNameAndCreator } from "./tracker/db";
-import * as fs from "fs";
+
 
 // Regional Variables
-const logFilePath = "./logs/tracker.log";
 let activeTransactions = 0;
 const MAX_CONCURRENT = config.tx.concurrent_transactions;
 let init = false;
-
-// LogFile
-const saveToLog = (message: string): void => {
-  fs.appendFileSync(logFilePath, `${new Date().toISOString()} - ${message}\n`, "utf8");
-};
-
 
 // Function used to handle the transaction once a new pool creation is found
 async function processTransaction(tokenMint: string | null, symbol: string | null, signature: string | null): Promise<void> {
@@ -150,23 +143,6 @@ function sendSubscribeRequestRadiyiumProgram(ws: WebSocket): void {
     params: [
       {
         mentions: [config.liquidity_pool.radiyum_program_id],
-      },
-      {
-        commitment: "processed", // Can use finalized to be more accurate.
-      },
-    ],
-  };
-  ws.send(JSON.stringify(request));
-}
-
-function sendSubscribeRequestMigration(ws: WebSocket): void {
-  const request: WebSocketRequest = {
-    jsonrpc: "2.0",
-    id: 1,
-    method: "logsSubscribe",
-    params: [
-      {
-        mentions: [config.programs.pump_raydium_migration],
       },
       {
         commitment: "processed", // Can use finalized to be more accurate.

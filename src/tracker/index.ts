@@ -22,9 +22,7 @@ const logFilePath = "./src/logs/tracker.log";
 let commulativePnL = 0;
 let commulativePnlUnrealized = 0;
 async function main() {
-  const priceUrl = process.env.JUP_HTTPS_PRICE_URI || "";
-  const dexPriceUrl = process.env.DEX_HTTPS_LATEST_TOKENS || "";
-  const solMint = config.liquidity_pool.wsol_pc_mint;
+
   while (true) {
     commulativePnlUnrealized = 0;
 
@@ -97,13 +95,10 @@ async function main() {
             const tokenName = holding.TokenName === "N/A" ? token : holding.TokenName;
             const tokenTime = holding.Time;
             const tokenBalance = holding.Balance;
-            const tokenSolPaid = holding.SolPaid;
-            const tokenSolFeePaid = holding.SolFeePaid;
             const tokenSolPaidUSDC = holding.SolPaidUSDC;
             const tokenSolFeePaidUSDC = holding.SolFeePaidUSDC;
             const tokenPerTokenPaidUSDC = holding.PerTokenPaidUSDC;
-            const tokenSlot = holding.Slot;
-            const tokenProgram = holding.Program;
+
 
             // Conver Trade Time
             const centralEuropenTime = DateTime.fromMillis(tokenTime).toLocal();
@@ -169,9 +164,8 @@ async function main() {
             // Get the current pricek
             saveLogTo(
               holdingLogs,
-              `${hrTradeTime}: Buy $${tokenSolPaidUSDC.toFixed(2)} | ${iconPnl} Unrealized PnL: $${unrealizedPnLUSDC.toFixed(
-                2
-              )} (${unrealizedPnLPercentage.toFixed(2)}%) | ${tokenBalance} ${tokenName} | ${tokenCurrentPrice.toFixed(8)} | ${token}`
+              `${hrTradeTime}: Buy $${tokenSolPaidUSDC.toFixed(2)} | ${iconPnl} Unrealized PnL: $${unrealizedPnLUSDC.toFixed(2)} 
+              (${unrealizedPnLPercentage.toFixed(2)}%) | ${tokenBalance} ${tokenName} | ${tokenCurrentPrice.toFixed(8)} | ${token}`
             );
 
           })
